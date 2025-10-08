@@ -58,15 +58,16 @@ int main(int argc, char *argv[])
         beginning of the file */
     rewind(inFilePtr);
 
+    // -------- Phase 1 ----------
+    // รับ label ทั้งหมด (อาจมี label ที่ reference อยู่ข้างหน้า)
+
     labelCount = 0;
     int address = 0;
     while (readAndParse(inFilePtr, label, opcode, arg0, arg1, arg2)) {
-        // if (opcode[0] == '\0') continue; // ข้ามบรรทัดว่างหรือคอมเมนต์
+        // DEBUG ทุกบรรทัดที่มีคำสั่ง
+        // cout << "DEBUG [" << address << "] label:'" << label << "' opcode:'" << opcode << "'" << endl;
 
-        // DEBUG ทุกบรรทัดที่ไม่ว่าง!
-        cout << "DEBUG [" << address << "] label:'" << label << "' opcode:'" << opcode << "'" << endl;
-
-        // ถ้า label ไม่ว่าง (มี label จริง)
+        // มี label
         if (label[0] != '\0') {
             strcpy(labelTable[labelCount].label, label);
             labelTable[labelCount].address = address;
@@ -75,10 +76,18 @@ int main(int argc, char *argv[])
         address++;  // address ต้องเพิ่มทุกบรรทัดที่มีคำสั่ง/ข้อมูล
     }
 
-    cout << "Label Table:" << endl;
-    for (int i = 0; i < labelCount; ++i) {
-        cout << "  " << labelTable[i].label << " -> " << labelTable[i].address << endl;
-    }
+    //แสดง Label + address
+    // cout << "Label Table:" << endl;
+    // for (int i = 0; i < labelCount; ++i) {
+    //     cout << "  " << labelTable[i].label << " -> " << labelTable[i].address << endl;
+    // }
+
+    // -------- Phase 2 ----------
+    // แปลงแต่ละคำสั่งเป็น machine code
+
+    /*reading from the beginning of the file(round 2)*/
+    rewind(inFilePtr);
+    
 
     /* after doing a readAndParse, you may want to do the following to test the
         opcode */
@@ -162,5 +171,13 @@ int isNumber(char *string)
     return( (sscanf(string, "%d", &i)) == 1);
 }
 
-
+int findLabelAddr(const char* target) {
+    for (int i = 0; i < labelCount; ++i) {
+        if (!strcmp(labelTable[i].label, target)) {
+            return labelTable[i].address;
+        }
+    }
+    printf("error: undefined label: %s\n", target);
+    exit(1);
+}
 
