@@ -62,6 +62,7 @@ void runSimulator(State &s) {
             next_pc = s.reg[a];
         }else if(op==6) { // halt
             executed++;
+            s.pc = next_pc;
             cout << "machine halted\n";
             cout << "total of " << executed << " instructions executed\n";
             cout << "final state of machine:\n";
@@ -92,7 +93,7 @@ int main(int argc, char** argv){
     s.numMemory = (int)s.memory.size();
     // รองรับจำนวน memory index > numMemory ตอน sw
     if(s.memory.size() < 32768)
-        s.memory.resize(32768, 0); // ให้ sw/lw ทำงานได้กับ address ที่ใหญ่
+        s.memory.resize(65536, 0); // ให้ sw/lw ทำงานได้กับ address ที่ใหญ่
     runSimulator(s);
     return 0;
 }
