@@ -20,6 +20,7 @@ int labelCount = 0;
 
 int readAndParse(FILE *, char *, char *, char *, char *, char *);
 int isNumber(char *);
+int findLabelAddr(const char* );
 
 int main(int argc, char *argv[])
 {
@@ -87,6 +88,91 @@ int main(int argc, char *argv[])
 
     /*reading from the beginning of the file(round 2)*/
     rewind(inFilePtr);
+
+    int pc = 0; // Program Counter แทน address ของแต่ละคำสั่ง
+
+    while (readAndParse(inFilePtr, label, opcode, arg0, arg1, arg2)) {
+        if (opcode[0] == '\0') {
+            pc++; // ทุกบรรทัดในไฟล์ถือเป็น address แม้ opcode จะว่าง
+            continue; // ข้ามบรรทัดว่าง
+        }
+
+        int machineCode = 0;
+
+        // ======== R-type instructions =========
+        if (!strcmp(opcode, "add")) {
+            int regA = atoi(arg0);
+            int regB = atoi(arg1);
+            int destReg = atoi(arg2);
+            machineCode = (0 << 22) | (regA << 19) | (regB << 16) | destReg;
+        }
+        else if (!strcmp(opcode, "nand")) {
+            int regA = atoi(arg0);
+            int regB = atoi(arg1);
+            int destReg = atoi(arg2);
+            machineCode = (1 << 22) | (regA << 19) | (regB << 16) | destReg;
+        }
+        // ======== I-type instructions =========
+        else if (!strcmp(opcode, "lw") || !strcmp(opcode, "sw")) {
+            int opNum = (!strcmp(opcode, "lw")) ? 2 : 3;
+            int regA = atoi(arg0);
+            int regB = atoi(arg1);
+            int offset;
+            if (isNumber(arg2)) {
+                offset = atoi(arg2);
+            } else {
+                offset = findLabelAddr(arg2); // offsetField
+            }
+            // รองรับ negative และ mask 16 บิต
+            machineCode = (opNum << 22) | (regA << 19) | (regB << 16) | (offset & 0xFFFF);
+        }
+        else if (!strcmp(opcode, "beq")) {
+            int regA = atoi(arg0);
+            int regB = atoi(arg1);
+            int offset;
+            if (isNumber(arg2)) {
+                offset = atoi(arg2);
+            } else {
+                offset = findLabelAddr(arg2) - (pc + 1); // offsetField = labelAddr - (pc+1)
+            }
+            // รองรับ negative และ mask 16 บิต
+            machineCode = (4 << 22) | (regA << 19) | (regB << 16) | (offset & 0xFFFF);
+        }
+        // ======== J-type instruction =========
+        else if (!strcmp(opcode, "jalr")) {
+            int regA = atoi(arg0);
+            int regB = atoi(arg1);
+            machineCode = (5 << 22) | (regA << 19) | (regB << 16);
+        }
+        // ======== O-type instructions =========
+        else if (!strcmp(opcode, "halt")) {
+            machineCode = (6 << 22);
+        }
+        else if (!strcmp(opcode, "noop")) {
+            machineCode = (7 << 22);
+        }
+        // ======== .fill Pseudo-instruction =========
+        else if (!strcmp(opcode, ".fill")) {
+            if (isNumber(arg0)) {
+                machineCode = atoi(arg0);
+            } else {
+                machineCode = findLabelAddr(arg0);
+            }
+        }
+        // ========= ไม่ตรง opcode อื่น =========
+        else {
+            printf("error: unrecognized opcode: %s at address %d\n", opcode, pc);
+            exit(2);
+        }
+
+        // เขียน machine code ลงไฟล์ output
+        fprintf(outFilePtr, "%d\n", machineCode);
+
+        pc++; // address +1 ทุกครั้ง
+    }
+
+    fclose(inFilePtr);
+    fclose(outFilePtr);
     
 
     /* after doing a readAndParse, you may want to do the following to test the
