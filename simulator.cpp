@@ -93,7 +93,7 @@ int main(int argc, char** argv){
     s.numMemory = (int)s.memory.size();
     // รองรับจำนวน memory index > numMemory ตอน sw
     if(s.memory.size() < 32768)
-        s.memory.resize(65536, 0); // ให้ sw/lw ทำงานได้กับ address ที่ใหญ่
+        s.memory.resize(32768, 0); // ให้ sw/lw ทำงานได้กับ address ที่ใหญ่
     runSimulator(s);
     return 0;
 }
