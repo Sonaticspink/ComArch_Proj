@@ -95,5 +95,6 @@ int main(int argc, char** argv){
     if(s.memory.size() < 32768)
         s.memory.resize(32768, 0); // ให้ sw/lw ทำงานได้กับ address ที่ใหญ่
     runSimulator(s);
+    cout << "s.numMemory = " << s.numMemory;
     return 0;
 }
