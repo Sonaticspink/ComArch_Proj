@@ -49,52 +49,47 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    /* here is an example for how to use readAndParse to read a line from
-        inFilePtr */
-    if (! readAndParse(inFilePtr, label, opcode, arg0, arg1, arg2) ) {
-        /* reached end of file */
-    }
 
     /* this is how to rewind the file ptr so that you start reading from the
         beginning of the file */
     rewind(inFilePtr);
 
     // -------- Phase 1 ----------
-    // รับ label ทั้งหมด (อาจมี label ที่ reference อยู่ข้างหน้า)
+    // get all labels (Checking label reference)
 
     labelCount = 0;
     int address = 0;
     while (readAndParse(inFilePtr, label, opcode, arg0, arg1, arg2)) {
-        // DEBUG ทุกบรรทัดที่มีคำสั่ง
+        // DEBUG show every line of instruction
         // cout << "DEBUG [" << address << "] label:'" << label << "' opcode:'" << opcode << "'" << endl;
 
-        // มี label
+        // has label
         if (label[0] != '\0') {
             strcpy(labelTable[labelCount].label, label);
             labelTable[labelCount].address = address;
             labelCount++;
         }
-        address++;  // address ต้องเพิ่มทุกบรรทัดที่มีคำสั่ง/ข้อมูล
+        address++;  // address must be added to every line containing instruntion/data
     }
 
-    //แสดง Label + address
+    //show Label + address
     // cout << "Label Table:" << endl;
     // for (int i = 0; i < labelCount; ++i) {
     //     cout << "  " << labelTable[i].label << " -> " << labelTable[i].address << endl;
     // }
 
     // -------- Phase 2 ----------
-    // แปลงแต่ละคำสั่งเป็น machine code
+    // convert each instruntions to machine code
 
     /*reading from the beginning of the file(round 2)*/
     rewind(inFilePtr);
 
-    int pc = 0; // Program Counter แทน address ของแต่ละคำสั่ง
+    int pc = 0; // Program Counter address in each instruction
 
     while (readAndParse(inFilePtr, label, opcode, arg0, arg1, arg2)) {
         if (opcode[0] == '\0') {
-            pc++; // ทุกบรรทัดในไฟล์ถือเป็น address แม้ opcode จะว่าง
-            continue; // ข้ามบรรทัดว่าง
+            pc++; 
+            continue; // skip blank line
         }
 
         int machineCode = 0;
@@ -123,7 +118,7 @@ int main(int argc, char *argv[])
             } else {
                 offset = findLabelAddr(arg2); // offsetField
             }
-            // รองรับ negative และ mask 16 บิต
+            // Supports negative and 16-bit mask
             machineCode = (opNum << 22) | (regA << 19) | (regB << 16) | (offset & 0xFFFF);
         }
         else if (!strcmp(opcode, "beq")) {
@@ -135,7 +130,7 @@ int main(int argc, char *argv[])
             } else {
                 offset = findLabelAddr(arg2) - (pc + 1); // offsetField = labelAddr - (pc+1)
             }
-            // รองรับ negative และ mask 16 บิต
+            // Supports negative and 16-bit mask.
             machineCode = (4 << 22) | (regA << 19) | (regB << 16) | (offset & 0xFFFF);
         }
         // ======== J-type instruction =========
@@ -159,13 +154,14 @@ int main(int argc, char *argv[])
                 machineCode = findLabelAddr(arg0);
             }
         }
-        // ========= ไม่ตรง opcode อื่น =========
+        // handle opcode error
+        // ========= not match other opcodes =========
         else {
             printf("error: unrecognized opcode: %s at address %d\n", opcode, pc);
             exit(2);
         }
 
-        // เขียน machine code ลงไฟล์ output
+        // write machine code into output file
         fprintf(outFilePtr, "%d\n", machineCode);
 
         pc++; // address +1 ทุกครั้ง
@@ -177,9 +173,9 @@ int main(int argc, char *argv[])
 
     /* after doing a readAndParse, you may want to do the following to test the
         opcode */
-    if (!strcmp(opcode, "add")) {
-        /* do whatever you need to do for opcode "add" */
-    }
+    // if (!strcmp(opcode, "add")) {
+    //     /* do whatever you need to do for opcode "add" */
+    // }
 
     return(0);
 }
@@ -207,7 +203,7 @@ int readAndParse(FILE *inFilePtr, char *label, char *opcode, char *arg0,
     /* read the line from the assembly-language file */
     bool foundLine = false;
     while (fgets(line, MAXLINELENGTH, inFilePtr) != NULL) {
-        // ตรวจสอบว่าเป็นบรรทัดว่างจริงๆ (มีแต่ whitespace)
+        // Check that the line is actually empty (only whitespace).
         bool isEmpty = true;
         for (int i = 0; line[i] != '\0'; i++) {
             if (line[i] != ' ' && line[i] != '\t' && line[i] != '\n' && line[i] != '\r') {
@@ -218,13 +214,13 @@ int readAndParse(FILE *inFilePtr, char *label, char *opcode, char *arg0,
         if (!isEmpty)   
         {
             foundLine = true;
-            break;  // ถ้าไม่ว่างให้หยุด loop
+            break;  // if not blank then loop
         }
     }
 
     if (!foundLine) return 0;
 
-    // ถ้าอ่านจนจบไฟล์
+    // read till the file's bottom line
     if (feof(inFilePtr)) return 0;
 
     /* check for line too long (by looking for a \n) */
