@@ -1,0 +1,69 @@
+        lw      0       5       pos1        ; $5 = 1 (step for stack pointer)
+        lw      0       1       n           ; $1 = n (input)
+        lw      0       2       r           ; $2 = r (input)
+        lw      0       6       comAddr    ; $6 = &comBi
+        jalr    6       7                   ; call comBi, $7=ret. addr, $3=result
+        halt
+comBi  sw      5      7      stack   ; push return address
+             add     5      5      5       ; increment stack pointer (assume $5=1)
+             sw      5      1      stack   ; push $1(n)
+             add     5      5      5
+             sw      5      2      stack   ; push $2(r)
+             add     5      5      5
+
+             lw      0      4      zero    ; $4 = 0
+             beq     2      4      base    ; if r==0, goto base
+
+             beq     1      2      base    ; if n==r, goto base
+
+             lw      0      4      neg1    ; $4 = -1
+             add     1      4      1       ; $1 = n-1
+             lw      0      6      comAddr
+             jalr    6      7              ; call, result in $3
+
+             sw      5      3      stack   ; save result1
+             add     5      5      5       ; increment stack pointer
+
+             lw      5      1      stack   ; restore $1=n-1 (ยังอยู่บน stack)
+             lw      5      4      neg1    ; $4 = -1
+             add     2      4      2       ; $2 = r-1
+             lw      0      6      comAddr
+             jalr    6      7              ; result in $3
+
+             add     5      2      5       ; stack pointer -= 1 (neg1)
+             lw      5      4      stack   ; $4 = result1
+             add     3      4      3       ; $3=result1+result2
+
+             add     5      2      5       ; stack pointer -= 1 (neg1)
+             lw      5      2      stack   ; restore r
+             add     5      2      5
+             lw      5      1      stack   ; restore n
+             add     5      2      5
+             lw      5      7      stack   ; restore return address
+             jalr    7      6              ; return
+
+base        lw      0      3      pos1     ; $3 = 1 (return value)
+             add     5      2      5
+             lw      5      2      stack   ; restore r
+             add     5      2      5
+             lw      5      1      stack   ; restore n
+             add     5      2      5
+             lw      5      7      stack   ; restore return address
+             jalr    7      6              ; return
+
+pos1        .fill   1
+neg1        .fill   -1
+zero        .fill   0
+comAddr     .fill   comBi
+n           .fill   5   ;  input n
+r           .fill   2   ;  input r
+stack       .fill   0   ;  start stack
+            .fill   0
+            .fill   0
+            .fill   0
+            .fill   0
+            .fill   0
+            .fill   0
+            .fill   0
+            .fill   0
+            .fill   0
