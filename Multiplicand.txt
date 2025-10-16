@@ -22,3 +22,4 @@ neg1    .fill    -1
 count   .fill     15
 mcand   .fill     32766
 mplier  .fill     10383
+stack   .fill     0
