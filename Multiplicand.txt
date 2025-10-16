@@ -1,25 +1,25 @@
-        lw        0         2         mcand
-        lw        0         3         mplier
-        lw        0         4         one
-        lw        0         6         count
-        lw        0         7         neg1
+        lw        0         2         mcand      ; r2 = mcand (ตัวถูกคูณ)
+        lw        0         3         mplier     ; r3 = mplier (ตัวคูณ)
+        lw        0         4         one        ; r4 = 1  (bit mask เริ่มที่บิต 0 เอาไว้ binary แล้วเช็คตำแหน่ง 1)
+        lw        0         6         count      ; r6 = 15 (จำนวนบิตที่ต้องวน)
+        lw        0         7         neg1       ; r7 = -1 (ใช้ลดตัวนับรอบ)
 
-loop    nand      3         4         5
-        nand      5         5         5
-        beq       5         0         skipadd
-        add       1         2         1
+loop    nand      3         4         5          ; r5 = ~(r3 & r4)
+        nand      5         5         5          ; r5 = ~(r5 & r5)  ← ทำ AND ด้วย 2×NAND เพราะไม่มี AND ให้ใช้
+        beq       5         0         skipadd    ; ถ้าบิตนี้เป็น 0 ข้ามการบวก
+        add       1         2         1          ; r1 += r2        (สะสมผลเมื่อบิต=1)
 
-skipadd add       2         2         2
-        add       4         4         4
-        add       6         7         6
-        beq       6         0         done
-        beq       0         0         loop
+skipadd add       2         2         2          ; r2 <<= 1        (shift-left โดยการบวกตัวเอง)
+        add       4         4         4          ; r4 <<= 1        (ขยับ mask ไปบิตถัดไป)
+        add       6         7         6          ; r6--            (ลดตัวนับ)
+        beq       6         0         done       ; ครบ 15 รอบแล้วจบ
+        beq       0         0         loop       ; วนลูปต่อ
 
 done    halt
 
 one     .fill     1
 neg1    .fill    -1
-count   .fill     15
-mcand   .fill     32766
-mplier  .fill     10383
-stack   .fill     0
+count   .fill     15          ; ประมวลผล 15 บิต (ตัวเลขเป็นบวกและ ≤ 15 บิต)
+mcand   .fill     32766       ; อินพุตตัวที่ 1
+mplier  .fill     10383       ; อินพุตตัวที่ 2
+stack   .fill     0       ; Tips ของอาจารย์
