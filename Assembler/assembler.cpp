@@ -65,6 +65,15 @@ int main(int argc, char *argv[])
 
         // has label
         if (label[0] != '\0') {
+
+            //Duplicate Label Handling
+            for (int i = 0; i < labelCount; ++i) {
+                if (strcmp(labelTable[i].label, label) == 0) {
+                    printf("error: duplicate label: %s\n", label);
+                    exit(1);
+                }
+            }
+
             strcpy(labelTable[labelCount].label, label);
             labelTable[labelCount].address = address;
             labelCount++;
