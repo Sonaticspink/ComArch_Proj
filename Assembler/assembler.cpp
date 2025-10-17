@@ -122,11 +122,18 @@ int main(int argc, char *argv[])
             int regA = atoi(arg0);
             int regB = atoi(arg1);
             int offset;
+
             if (isNumber(arg2)) {
                 offset = atoi(arg2);
             } else {
                 offset = findLabelAddr(arg2); // offsetField
             }
+            //check offsetfiled
+            if (offset < -32768 || offset > 32767) {
+                printf("error: offsetField out of range at address %d\n", pc);
+                exit(1);
+            }
+            
             // Supports negative and 16-bit mask
             machineCode = (opNum << 22) | (regA << 19) | (regB << 16) | (offset & 0xFFFF);
         }
