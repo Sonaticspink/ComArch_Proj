@@ -1,0 +1,51 @@
+        lw      0       4       neg1       ; reg4 = -1 (ไว้ใช้ลด index)
+        lw      0       5       dpadr      ; reg5 = address ของ dp[]
+        lw      0       2       r          ; reg2 = r
+        lw      0       6       one        ; reg6 = 1
+        sw      5       6       0          ; dp[0] = 1
+        add     0       6       3          ; reg3 = 1 (เริ่ม i = 1)
+
+i_top   lw      0       1       n          ; reg1 = n
+        lw      0       6       one        ; reg6 = 1
+        add     1       6       1          ; reg1 = n + 1
+        beq     3       1       done       ; ถ้า i == n+1 → เสร็จสิ้น
+
+        add     5       2       7          ; reg7 = &dp[r] (เริ่ม loop k)
+k_top   beq     7       5       k_end      ; ถ้า index ครบ dp แล้ว → จบ loop k
+        lw      7       1       0          ; reg1 = dp[k]
+        add     7       4       6          ; reg6 = addr(dp[k-1])
+        lw      6       6       0          ; reg6 = dp[k-1]
+        add     1       6       1          ; reg1 = dp[k] + dp[k-1]
+        sw      7       1       0          ; dp[k] = dp[k] + dp[k-1]
+        add     7       4       7          ; reg7 = addr(dp[k-1]) ← เดินถอยหลัง
+        beq     0       0       k_top      ; กลับไปทำ loop k ต่อ
+
+k_end   lw      0       6       one        ; reg6 = 1
+        add     3       6       3          ; i++
+        beq     0       0       i_top      ; กลับไป loop i
+
+done    add     5       2       7          ; reg7 = &dp[r]
+        lw      7       3       0          ; reg3 = dp[r] → ผลลัพธ์ C(n,r)
+        halt                               ; หยุดโปรแกรม
+
+n       .fill   7
+r       .fill   3
+one     .fill   1
+neg1    .fill   -1
+dpadr   .fill   dp
+dp      .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
+        .fill   0
