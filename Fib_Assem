@@ -1,0 +1,25 @@
+        lw      0       5       n           ; reg5 = n (จำนวนลำดับที่ต้องการ)
+        lw      0       6       one         ; reg6 = 1
+        beq     5       0       n_zero      ; ถ้า n == 0 → jump ไป n_zero
+        beq     5       6       n_one       ; ถ้า n == 1 → jump ไป n_one
+        add     0       0       2           ; reg2 = 0 → F(0)
+        add     0       6       3           ; reg3 = 1 → F(1)
+        add     0       5       1           ; reg1 = n (ตัวนับ loop)
+        lw      0       4       neg1        ; reg4 = -1 (ไว้ลดค่า index)
+
+loop    beq     1       6       done        ; ถ้าเหลือ 1 รอบสุดท้าย → เสร็จสิ้น
+        add     2       3       7           ; reg7 = F(i-2) + F(i-1)
+        add     0       3       2           ; reg2 = F(i-1)
+        add     0       7       3           ; reg3 = F(i)
+        add     1       4       1           ; i--
+        beq     0       0       loop        ; วนซ้ำคำนวณต่อ
+
+n_zero  add     0       0       3           ; F(0) = 0 → reg3 = 0
+        halt
+n_one   add     0       6       3           ; F(1) = 1 → reg3 = 1
+        halt
+done    halt                                ; หยุดโปรแกรมเมื่อครบ n
+
+n       .fill   7                           ; กำหนด n
+one     .fill   1
+neg1    .fill   -1
