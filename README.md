@@ -1,5 +1,5 @@
 # CumArch_Proj
-ให้กูผ่านเท้ออออออ 
+ให้ผ่านเท้ออออออ 
 
 Worksheet : https://docs.google.com/spreadsheets/d/1i4AWhvreFV_khCpI1RQWN-OePGecgbeTu_-vZAU_a7I/edit?usp=sharing
 
